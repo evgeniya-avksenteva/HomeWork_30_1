@@ -1,5 +1,3 @@
-from rest_framework import serializers
-
 from materials.models import Course, Lesson
 
 from rest_framework.serializers import ModelSerializer
