@@ -11,4 +11,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", index),
     path("materials/", include("materials.urls")),
+    path('api/', include(('users.urls', 'users'), namespace='users')),
 ]
