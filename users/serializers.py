@@ -23,3 +23,18 @@ class PaymentSerializer(serializers.ModelSerializer):
             'payment_method',
         ]
         read_only_fields = ['payment_date']
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'phone', 'city', 'avatar']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user

@@ -1,7 +1,10 @@
 from django.db import models
 
+from config import settings
+
 
 class Course(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
     course_name = models.CharField(
         max_length=100,
         blank=True,
@@ -31,6 +34,7 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
     lesson_name = models.CharField(
         max_length=35,
         blank=True,

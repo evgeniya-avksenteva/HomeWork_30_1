@@ -4,6 +4,8 @@ from django.db import models
 from django.conf import settings
 from materials.models import Course, Lesson
 
+from .managers import UserManager
+
 
 class User(AbstractUser):
     username = None
@@ -36,6 +38,8 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    objects = UserManager()
 
     class Meta:
         verbose_name = "Пользователь"
