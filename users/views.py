@@ -1,14 +1,13 @@
-from rest_framework import viewsets
-from .models import User
-from .serializers import UserSerializer, PaymentSerializer, UserRegistrationSerializer
-
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework import generics, permissions, viewsets
 from rest_framework.filters import OrderingFilter
-from rest_framework import viewsets, generics, permissions
-from users.models import Payment
-from users.filters import PaymentFilter
 
+from users.filters import PaymentFilter
+from users.models import Payment
+
+from .models import User
+from .serializers import (PaymentSerializer, UserRegistrationSerializer,
+                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -17,7 +16,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, OrderingFilter]
 
-    ordering_fields = ['email']
+    ordering_fields = ["email"]
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -26,7 +26,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
     filterset_class = PaymentFilter
 
     # Для сортировки по дате оплаты через параметр ordering
-    ordering_fields = ['payment_date']
+    ordering_fields = ["payment_date"]
 
 
 class UserRegistrationView(generics.CreateAPIView):

@@ -1,7 +1,7 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from django.conf import settings
 from materials.models import Course, Lesson
 
 from .managers import UserManager
@@ -35,7 +35,6 @@ class User(AbstractUser):
         help_text="Введите название города",
     )
 
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
@@ -51,8 +50,8 @@ class User(AbstractUser):
 
 class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
-        ('cash', 'Наличные'),
-        ('bank_transfer', 'Перевод на счет'),
+        ("cash", "Наличные"),
+        ("bank_transfer", "Перевод на счет"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

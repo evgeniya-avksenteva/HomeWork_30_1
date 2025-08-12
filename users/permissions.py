@@ -1,10 +1,18 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsModerator(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and \
-               request.user.groups.filter(name='Модераторы').exists()
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.groups.filter(name="Модераторы").exists()
+        )
+
+
+class IsNotModerator(BasePermission):
+    def has_permission(self, request, view):
+        return not request.user.groups.filter(name="Модераторы").exists()
 
 
 class IsOwnerOrReadOnly(BasePermission):
@@ -13,5 +21,7 @@ class IsOwnerOrReadOnly(BasePermission):
         # изменение — только владельцу или модератору.
         if request.method in SAFE_METHODS:
             return True
-        return obj.user == request.user or \
-               request.user.groups.filter(name='Модераторы').exists()
+        return (
+            obj.user == request.user
+            or request.user.groups.filter(name="Модераторы").exists()
+        )
