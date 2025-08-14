@@ -15,13 +15,10 @@ class IsNotModerator(BasePermission):
         return not request.user.groups.filter(name="Модераторы").exists()
 
 
-class IsOwnerOrReadOnly(BasePermission):
+class IsOwnerProfile(BasePermission):
     def has_object_permission(self, request, view, obj):
-        # чтение разрешено всем авторизованным пользователям,
-        # изменение — только владельцу или модератору.
+        # Разрешаем чтение всем авторизованным (если нужна такая логика). Можно убрать, если нужна только аутентификация.
         if request.method in SAFE_METHODS:
             return True
-        return (
-            obj.user == request.user
-            or request.user.groups.filter(name="Модераторы").exists()
-        )
+        # Редактирование/удаление — только своему профилю
+        return obj.id == getattr(request.user, "id", None)

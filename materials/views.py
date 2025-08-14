@@ -1,55 +1,56 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import generics, viewsets
 
 from materials.models import Course, Lesson
+from materials.permissions import IsOwnerOrReadOnlyOrModerator
 from materials.serializers import CourseSerializer, LessonSerializer
-from users.permissions import IsModerator, IsOwnerOrReadOnly
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnlyOrModerator]
 
-    def get_permissions(self):
-        if self.action in ["create", "destroy"]:
-            permission_classes = [IsModerator]
-        elif self.action in ["list", "retrieve", "update", "partial_update"]:
-            permission_classes = [permissions.IsAuthenticated]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    def get_queryset(self):
+        user = self.request.user
+        is_moderator = bool(
+            user.is_authenticated and user.groups.filter(name="Модераторы").exists()
+        )
+        if is_moderator:
+            return Course.objects.all()
+        return Course.objects.filter(owner=user)
 
     def perform_create(self, serializer):
-        # автоматически устанавливать owner при создании курса
         serializer.save(owner=self.request.user)
 
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnlyOrModerator]
 
-    def get_permissions(self):
-        if self.request.method == "POST":
-            permission_classes = [IsModerator]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    def get_queryset(self):
+        user = self.request.user
+        is_moderator = bool(
+            user.is_authenticated and user.groups.filter(name="Модераторы").exists()
+        )
+        if is_moderator:
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=user)
 
-    def perform_update(self, serializer):
-        # Можно установить owner при необходимости или оставить как есть.
-        serializer.save()
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsOwnerOrReadOnlyOrModerator]
 
-    def get_permissions(self):
-        if self.request.method in ["PUT", "PATCH", "DELETE"]:
-            permission_classes = [IsModerator]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    def get_queryset(self):
+        user = self.request.user
+        is_moderator = bool(
+            user.is_authenticated and user.groups.filter(name="Модераторы").exists()
+        )
+        if is_moderator:
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=user)
