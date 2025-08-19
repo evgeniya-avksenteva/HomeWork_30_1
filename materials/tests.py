@@ -143,12 +143,24 @@ class LessonNegativeTests(APITestCase):
             status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
 
+
 class LessonValidationAndAccessTests(APITestCase):
     def setUp(self):
-        self.owner = User.objects.create_user(email="owner2@example.com", password="pass1234")
-        self.other_user = User.objects.create_user(email="other2@example.com", password="pass1234")
-        self.course = Course.objects.create(course_name="Validation Course", owner=self.owner, )
-        self.lesson = Lesson.objects.create(lesson_name="Val Lesson", course=self.course, owner=self.owner, )
+        self.owner = User.objects.create_user(
+            email="owner2@example.com", password="pass1234"
+        )
+        self.other_user = User.objects.create_user(
+            email="other2@example.com", password="pass1234"
+        )
+        self.course = Course.objects.create(
+            course_name="Validation Course",
+            owner=self.owner,
+        )
+        self.lesson = Lesson.objects.create(
+            lesson_name="Val Lesson",
+            course=self.course,
+            owner=self.owner,
+        )
 
         self.lesson_list_url = reverse("lesson-list-create")  # /lessons/
         self.lesson_detail_url = reverse("lesson-detail", kwargs={"pk": self.lesson.pk})
@@ -163,9 +175,13 @@ class LessonValidationAndAccessTests(APITestCase):
 
     def test_owner_cannot_update_constraints_other_user(self):
         self.client.force_authenticate(user=self.other_user)
-        resp = self.client.put(self.lesson_detail_url, {"lesson_name": "Other"}, format="json")
-        assert resp.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND)
-
+        resp = self.client.put(
+            self.lesson_detail_url, {"lesson_name": "Other"}, format="json"
+        )
+        assert resp.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        )
 
 
 class SubscriptionAPITests(APITestCase):
