@@ -7,8 +7,7 @@ from users.models import Payment
 
 from .models import User
 from .permissions import IsOwnerProfile
-from .serializers import (PaymentSerializer, UserRegistrationSerializer,
-                          UserSerializer)
+from .serializers import PaymentSerializer, UserRegistrationSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

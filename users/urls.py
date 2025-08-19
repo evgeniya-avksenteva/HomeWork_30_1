@@ -5,9 +5,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .views import PaymentViewSet, UserRegistrationView, UserViewSet
 
 app_name = "users"
-
 router = DefaultRouter()
-router.register(r"users", UserViewSet)
+
+router.register(r"users", UserViewSet, basename="users")
 router.register(r"payments", PaymentViewSet)
 
 urlpatterns = [

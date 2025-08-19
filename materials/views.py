@@ -1,15 +1,12 @@
-from rest_framework import generics, viewsets, status
+from rest_framework import generics, status, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from rest_framework.generics import get_object_or_404
-
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import StandardResultsSetPagination
-
-from materials.permissions import IsModerator, IsOwner, NotModerator
-
+from materials.permissions import IsOwner, NotModerator
 from materials.serializers import CourseSerializer, LessonSerializer
 
 
@@ -44,15 +41,6 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     pagination_class = StandardResultsSetPagination
 
-    # def get_permissions(self):
-    #     if self.action in ["list", "retrieve"]:
-    #         permission_classes = [IsAuthenticated]
-    #     elif self.action == "create":
-    #         permission_classes = [IsAuthenticated, NotModerator]
-    #     else:
-    #         permission_classes = [IsAuthenticated, IsOwner]
-    #     return [permission() for permission in permission_classes]
-
     def get_permissions(self):
         action = getattr(self, "action", None)
         if action in ["list", "retrieve"] or self.request.method == "GET":
@@ -63,7 +51,6 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
             permission_classes = [IsAuthenticated, IsOwner]
         return [permission() for permission in permission_classes]
 
-
     def get_queryset(self):
         qs = super().get_queryset()
         if not self.request.user.groups.filter(name="Модераторы").exists():
@@ -73,11 +60,13 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
     def post(self, request, *args, **kwargs):
         user = request.user
         if not user or not user.is_authenticated:
-            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"detail": "Authentication credentials were not provided."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         if user.is_staff:
             return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
         course_id = request.data.get("course")
@@ -92,18 +81,10 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-
 class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     pagination_class = StandardResultsSetPagination
-
-    # def get_permissions(self):
-    #     if self.action == "retrieve":
-    #         permission_classes = [IsAuthenticated]
-    #     else:  # update/partial_update/destroy
-    #         permission_classes = [IsAuthenticated, IsOwner]
-    #     return [permission() for permission in permission_classes]
 
     def get_permissions(self):
         action = getattr(self, "action", None)
@@ -112,7 +93,6 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         else:  # update/partial_update/destroy
             permission_classes = [IsAuthenticated, IsOwner]
         return [permission() for permission in permission_classes]
-
 
     def get_queryset(self):
         qs = super().get_queryset()
