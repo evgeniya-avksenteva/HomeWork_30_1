@@ -9,6 +9,10 @@ from materials.paginators import StandardResultsSetPagination
 from materials.permissions import IsOwner, NotModerator
 from materials.serializers import CourseSerializer, LessonSerializer
 
+# @method_decorator(name='list', decorator=swagger_auto_schema(
+#     operation_description="description from swagger_auto_schema via method_decorator"
+# ))
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -28,6 +32,9 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        # Добавить защиту от анонимности
+        if not self.request.user or not self.request.user.is_authenticated:
+            return qs.none()  # или вернуть публичные курсы, если нужно
         if not self.request.user.groups.filter(name="Модераторы").exists():
             qs = qs.filter(owner=self.request.user)
         return qs
@@ -53,6 +60,8 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not self.request.user or not self.request.user.is_authenticated:
+            return qs.none()
         if not self.request.user.groups.filter(name="Модераторы").exists():
             qs = qs.filter(owner=self.request.user)
         return qs
@@ -96,6 +105,8 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        if not self.request.user or not self.request.user.is_authenticated:
+            return qs.none()
         if not self.request.user.groups.filter(name="Модераторы").exists():
             qs = qs.filter(owner=self.request.user)
         return qs

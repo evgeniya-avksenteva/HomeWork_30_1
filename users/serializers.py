@@ -18,13 +18,14 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
-            "payment_date",
+            "created_at",
             "course",
-            "lesson",
             "amount",
-            "payment_method",
+            "session_id",
+            "link",
+            "status",
         ]
-        read_only_fields = ["payment_date"]
+        read_only_fields = ["created_at", "status"]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
