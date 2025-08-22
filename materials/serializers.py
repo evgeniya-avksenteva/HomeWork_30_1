@@ -3,6 +3,7 @@ from rest_framework.serializers import ModelSerializer
 
 from materials.models import Course, Lesson, Subscription
 from materials.validators import validate_allowed_url
+from users.models import Payment
 
 
 class LessonSerializer(ModelSerializer):
@@ -46,3 +47,15 @@ class CourseSerializer(ModelSerializer):
         if request and request.user.is_authenticated:
             return Subscription.objects.filter(user=request.user, course=obj).exists()
         return False
+
+
+class SubscriptionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ["course"]
+
+
+class PaymentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["course", "amount"]

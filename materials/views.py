@@ -4,14 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import StandardResultsSetPagination
 from materials.permissions import IsOwner, NotModerator
-from materials.serializers import CourseSerializer, LessonSerializer
+from materials.serializers import CourseSerializer, LessonSerializer, SubscriptionCreateSerializer
 
-# @method_decorator(name='list', decorator=swagger_auto_schema(
-#     operation_description="description from swagger_auto_schema via method_decorator"
-# ))
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -34,7 +35,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         # Добавить защиту от анонимности
         if not self.request.user or not self.request.user.is_authenticated:
-            return qs.none()  # или вернуть публичные курсы, если нужно
+            return qs  # или вернуть публичные курсы, если нужно
         if not self.request.user.groups.filter(name="Модераторы").exists():
             qs = qs.filter(owner=self.request.user)
         return qs
@@ -115,12 +116,28 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 class SubscriptionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Подписаться/отписаться на курс",
+        request_body=SubscriptionCreateSerializer,
+        responses={
+            200: openapi.Response(
+                description="Результат подписки",
+                examples={
+                    "application/json": {"message": "Подписка создана"}
+                },
+            ),
+            400: openapi.Response(description="Ошибка ввода"),
+            401: openapi.Response(description="НеАвторизован"),
+            403: openapi.Response(description="Доступ запрещён"),
+        },
+    )
+
     def post(self, request, *args, **kwargs):
         user = request.user
-        course_id = request.data.get("course_id")
+        course_id = request.data.get("course")
 
         if not course_id:
-            return Response({"error": "course_id не указан"}, status=400)
+            return Response({"error": "course не указан"}, status=400)
 
         course = get_object_or_404(Course, id=course_id)
         subs_qs = Subscription.objects.filter(user=user, course=course)

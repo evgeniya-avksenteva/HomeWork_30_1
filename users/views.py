@@ -2,10 +2,11 @@ import stripe
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from materials.serializers import PaymentCreateSerializer
 from users.models import Payment
 from users.services import (
     create_stripe_checkout_session,
@@ -16,6 +17,9 @@ from users.services import (
 from .models import User
 from .permissions import IsOwnerProfile
 from .serializers import PaymentSerializer, UserRegistrationSerializer, UserSerializer
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -55,7 +59,7 @@ class PaymentAPIView(generics.CreateAPIView):
         success_url = (
             f"http://127.0.0.1:8000/materials/{course_id}/"
             if course_id
-            else "https://127.0.0.1:8000/materials/"
+            else "http://127.0.0.1:8000/materials/"
         )
         cancel_url = "https://yourdomain.com/materials/payment-cancelled/"
         session = create_stripe_checkout_session(
@@ -74,6 +78,30 @@ class PaymentAPIView(generics.CreateAPIView):
 
         self.response_data = {"payment_id": payment.id, "checkout_url": session.url}
 
+    @swagger_auto_schema(
+        operation_description="Создание платежа: формирование Stripe продукта/цены/сессии",
+        request_body=PaymentCreateSerializer,
+        responses={
+            201: openapi.Response(
+                description="Создан платеж",
+                PaymentSerializerschema=PaymentSerializer,
+                examples={
+                    "application/json": {
+                        "id": 123,
+                        "user": 1,
+                        "created_at": "2025-08-21T12:34:56Z",
+                        "course": 2,
+                        "amount": 1500,
+                        "session_id": "sess_ABC",
+                        "link": "https://checkout.stripe.com/sess_ABC",
+                        "status": "pending",
+                    }
+                },
+            )
+        },
+    )
+
+
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         return Response(self.response_data, status=status.HTTP_201_CREATED)
@@ -81,6 +109,37 @@ class PaymentAPIView(generics.CreateAPIView):
 
 class PaymentStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Получение статуса платежа по session_id",
+        manual_parameters=[
+            openapi.Parameter(
+                "session_id",
+                openapi.IN_QUERY,
+                description="ID сессии Stripe",
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Статус платежа",
+                examples={
+                    "application/json": {
+                        "id": "sess_1ABCDEFG",
+                        "payment_status": "paid",
+                        "amount_total": 10000,
+                        "currency": "usd",
+                        "customer_details": {"email": "user@example.com"},
+                        "payment_intent": "pi_1ABCDEFG",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Ошибка запроса"),
+            404: openapi.Response(description="Сессия не найдена"),
+        },
+    )
+
 
     def get(self, request, *args, **kwargs):
         session_id = request.query_params.get("session_id")
