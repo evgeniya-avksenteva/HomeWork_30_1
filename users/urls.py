@@ -21,4 +21,5 @@ urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="login"),
     path("payments/", PaymentAPIView.as_view(), name="payments-create"),
     path("payments/status/", PaymentStatusAPIView.as_view(), name="payments-status"),
+    path("payments/<int:payment_id>/status/", PaymentStatusAPIView.as_view(), name="payment-status"),
 ]

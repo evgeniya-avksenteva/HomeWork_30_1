@@ -59,3 +59,7 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = ["course", "amount"]
+
+
+class SubscriptionResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()

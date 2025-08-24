@@ -15,17 +15,13 @@ class UserSerializer(ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = [
-            "id",
-            "user",
-            "created_at",
-            "course",
-            "amount",
-            "session_id",
-            "link",
-            "status",
-        ]
-        read_only_fields = ["created_at", "status"]
+        fields = ["id"]
+        read_only_fields = ["id"]
+
+
+class CreatePaymentSerializer(serializers.Serializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    course_id = serializers.IntegerField()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

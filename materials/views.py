@@ -1,5 +1,5 @@
+from django.http import Http404
 from rest_framework import generics, status, viewsets
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,10 +8,13 @@ from rest_framework.views import APIView
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import StandardResultsSetPagination
 from materials.permissions import IsOwner, NotModerator
-from materials.serializers import CourseSerializer, LessonSerializer, SubscriptionCreateSerializer
+from materials.serializers import CourseSerializer, LessonSerializer, SubscriptionCreateSerializer, \
+    SubscriptionResponseSerializer
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+
+from django.shortcuts import get_object_or_404
 
 
 
@@ -113,6 +116,12 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         return qs
 
 
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 class SubscriptionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -122,16 +131,31 @@ class SubscriptionAPIView(APIView):
         responses={
             200: openapi.Response(
                 description="Результат подписки",
+                schema=SubscriptionResponseSerializer,
                 examples={
                     "application/json": {"message": "Подписка создана"}
                 },
             ),
-            400: openapi.Response(description="Ошибка ввода"),
-            401: openapi.Response(description="НеАвторизован"),
-            403: openapi.Response(description="Доступ запрещён"),
+            400: openapi.Response(
+                description="Ошибка ввода",
+                examples={
+                    "application/json": {"error": "course не указан"}
+                }
+            ),
+            404: openapi.Response(
+                description="Курс не найден",
+                examples={
+                    "application/json": {"error": "Курс не найден"}
+                }
+            ),
+            401: openapi.Response(
+                description="НеАвторизован",
+                examples={
+                    "application/json": {"detail": "Authentication credentials were not provided."}
+                }
+            ),
         },
     )
-
     def post(self, request, *args, **kwargs):
         user = request.user
         course_id = request.data.get("course")
@@ -139,14 +163,22 @@ class SubscriptionAPIView(APIView):
         if not course_id:
             return Response({"error": "course не указан"}, status=400)
 
-        course = get_object_or_404(Course, id=course_id)
+        # Попытка получить курс или вернуть 404, если не найден
+        try:
+            course = get_object_or_404(Course, id=course_id)
+        except Http404:
+            return Response({"error": "Курс не найден"}, status=404)
+
+        # Проверка существующей подписки
         subs_qs = Subscription.objects.filter(user=user, course=course)
 
         if subs_qs.exists():
             subs_qs.delete()
-            message = "Подписка удалена"
+            message_text = "Подписка удалена"
         else:
             Subscription.objects.create(user=user, course=course)
-            message = "Подписка создана"
+            message_text = "Подписка создана"
 
-        return Response({"message": message})
+        # Формируем ответ через сериализатор
+        serializer = SubscriptionResponseSerializer({"message": message_text})
+        return Response(serializer.data, status=status.HTTP_200_OK)
