@@ -16,6 +16,8 @@ from drf_yasg.utils import swagger_auto_schema
 
 from django.shortcuts import get_object_or_404
 
+from materials.tasks import send_course_update_email
+
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -45,6 +47,15 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        """ Логика отправки писем в контроллере обновления курса """
+        course = serializer.save()
+        # Получаем всех подписчиков курса
+        subscriptions = Subscription.objects.filter(course=course)
+        for sub in subscriptions:
+            # Запускаем асинхронную задачу отправки письма
+            send_course_update_email.delay(sub.user.email, course.title)
 
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
