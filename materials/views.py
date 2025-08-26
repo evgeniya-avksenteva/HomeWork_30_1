@@ -55,7 +55,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         subscriptions = Subscription.objects.filter(course=course)
         for sub in subscriptions:
             # Запускаем асинхронную задачу отправки письма
-            send_course_update_email.delay(sub.user.email, course.title)
+            send_course_update_email.delay(sub.user.email, course.course_name)
 
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
