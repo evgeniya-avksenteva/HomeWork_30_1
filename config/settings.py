@@ -142,9 +142,9 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
-    'send-course-update-emails': {
-        'task': 'materials.tasks.send_course_update_email',
-        'schedule': timedelta(minutes=10),
+    'deactivate_inactive_users': {
+        'task': 'users.tasks.deactivate_inactive_users',
+        'schedule': crontab(hour=0, minute=0),
     },
 }
 
