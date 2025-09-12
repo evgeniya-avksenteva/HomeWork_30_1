@@ -24,6 +24,7 @@
 - Redis: проверьте логи контейнера Redis:
 docker-compose logs redis
 Celery: проверьте, что воркер Celery запущен и без ошибок:
-docker-compose logs celery
-Celery Beat: проверьте работу планировщика задач: docker-compose logs celery-beat
+- docker-compose logs celery
+Celery Beat: проверьте работу планировщика задач:
+- docker-compose logs celery-beat
 
