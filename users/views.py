@@ -1,15 +1,14 @@
 import stripe
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, status, viewsets, serializers
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from materials.models import Course
-
-from drf_yasg import openapi
-
 from users.models import Payment
 from users.services import (
     create_stripe_checkout_session,
@@ -19,9 +18,12 @@ from users.services import (
 
 from .models import User
 from .permissions import IsOwnerProfile
-from .serializers import PaymentSerializer, UserRegistrationSerializer, UserSerializer, CreatePaymentSerializer
-
-from drf_yasg.utils import swagger_auto_schema
+from .serializers import (
+    CreatePaymentSerializer,
+    PaymentSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -48,8 +50,8 @@ class PaymentAPIView(generics.CreateAPIView):
         input_serializer = CreatePaymentSerializer(data=data)
         input_serializer.is_valid(raise_exception=True)
 
-        price_decimal = input_serializer.validated_data['price']
-        course_id = input_serializer.validated_data['course_id']
+        price_decimal = input_serializer.validated_data["price"]
+        course_id = input_serializer.validated_data["course_id"]
 
         # Получаем курс
         course = Course.objects.filter(id=course_id).first()
@@ -84,7 +86,7 @@ class PaymentAPIView(generics.CreateAPIView):
             link=session.url,
             user=self.request.user,
             course=course,
-            status='pending',
+            status="pending",
         )
 
         # Запоминаем ответ (только id)
@@ -116,6 +118,7 @@ class PaymentAPIView(generics.CreateAPIView):
         response = super().create(request, *args, **kwargs)
         return Response(self.response_data, status=status.HTTP_201_CREATED)
 
+
 class PaymentStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -140,16 +143,19 @@ class PaymentStatusAPIView(APIView):
             404: openapi.Response(description="Платеж не найден"),
         },
     )
-
     def get(self, request, payment_id):
         try:
             payment = Payment.objects.get(id=payment_id)
         except Payment.DoesNotExist:
-            return Response({"error": "Платеж не найден."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Платеж не найден."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         session_id = payment.session_id
         if not session_id:
-            return Response({"error": "ID сессии отсутствует."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "ID сессии отсутствует."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             session = stripe.checkout.Session.retrieve(session_id)

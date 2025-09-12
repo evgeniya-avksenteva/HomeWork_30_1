@@ -1,23 +1,22 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
 from materials.models import Course, Lesson, Subscription
 from materials.paginators import StandardResultsSetPagination
 from materials.permissions import IsOwner, NotModerator
-from materials.serializers import CourseSerializer, LessonSerializer, SubscriptionCreateSerializer, \
-    SubscriptionResponseSerializer
-
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-
-from django.shortcuts import get_object_or_404
-
+from materials.serializers import (
+    CourseSerializer,
+    LessonSerializer,
+    SubscriptionCreateSerializer,
+    SubscriptionResponseSerializer,
+)
 from materials.tasks import send_course_update_email
-
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -49,7 +48,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
     def perform_update(self, serializer):
-        """ Логика отправки писем в контроллере обновления курса """
+        """Логика отправки писем в контроллере обновления курса"""
         course = serializer.save()
         # Получаем всех подписчиков курса
         subscriptions = Subscription.objects.filter(course=course)
@@ -127,11 +126,12 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         return qs
 
 
-from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.response import Response
+
 
 class SubscriptionAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -143,27 +143,23 @@ class SubscriptionAPIView(APIView):
             200: openapi.Response(
                 description="Результат подписки",
                 schema=SubscriptionResponseSerializer,
-                examples={
-                    "application/json": {"message": "Подписка создана"}
-                },
+                examples={"application/json": {"message": "Подписка создана"}},
             ),
             400: openapi.Response(
                 description="Ошибка ввода",
-                examples={
-                    "application/json": {"error": "course не указан"}
-                }
+                examples={"application/json": {"error": "course не указан"}},
             ),
             404: openapi.Response(
                 description="Курс не найден",
-                examples={
-                    "application/json": {"error": "Курс не найден"}
-                }
+                examples={"application/json": {"error": "Курс не найден"}},
             ),
             401: openapi.Response(
                 description="НеАвторизован",
                 examples={
-                    "application/json": {"detail": "Authentication credentials were not provided."}
-                }
+                    "application/json": {
+                        "detail": "Authentication credentials were not provided."
+                    }
+                },
             ),
         },
     )
