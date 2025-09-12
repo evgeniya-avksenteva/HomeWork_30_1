@@ -19,6 +19,7 @@ django-timezone-field==7.1
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 drf-yasg==1.21.10
+gunicorn==23.0.0
 idna==3.10
 inflection==0.5.1
 isort==6.0.1
@@ -46,6 +47,4 @@ tzdata==2025.2
 uritemplate==4.2.0
 urllib3==2.5.0
 vine==5.1.0
-wcwidth==0.2.13
-
 
