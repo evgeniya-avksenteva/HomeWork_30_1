@@ -1,0 +1,43 @@
+Name                                                     Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------------------
+config/__init__.py                                           0      0   100%
+config/asgi.py                                               4      4     0%   10-16
+config/settings.py                                          27      0   100%
+config/urls.py                                               7      1    86%   7
+config/wsgi.py                                               4      4     0%   10-16
+manage.py                                                   11      2    82%   12-13
+materials/__init__.py                                        0      0   100%
+materials/admin.py                                           1      0   100%
+materials/apps.py                                            4      0   100%
+materials/migrations/0001_initial.py                         6      0   100%
+materials/migrations/0002_course_owner_lesson_owner.py       6      0   100%
+materials/migrations/0003_subscription.py                    6      0   100%
+materials/migrations/__init__.py                             0      0   100%
+materials/models.py                                         33      3    91%   34, 79, 104
+materials/paginators.py                                      5      0   100%
+materials/permissions.py                                    12      2    83%   6, 17
+materials/serializers.py                                    27      7    74%   40-47
+materials/tests.py                                         100     71    29%   6, 14, 41, 44-68, 108-109, 115, 125-215
+materials/urls.py                                            6      0   100%
+materials/validators.py                                      7      4    43%   11-15
+materials/views.py                                          92     47    49%   5-7, 10, 14-15, 20, 23-31, 33-41, 46-55, 63, 65, 70-72, 75-76, 81-87, 92, 97, 104, 107, 111, 114, 117, 121, 124
+users/__init__.py                                            0      0   100%
+users/admin.py                                               1      0   100%
+users/apps.py                                                4      0   100%
+users/filters.py                                            10      0   100%
+users/management/__init__.py                                 0      0   100%
+users/management/commands/__init__.py                        0      0   100%
+users/management/commands/generate_test_payments.py         19     19     0%   1-34
+users/managers.py                                           19      8    58%   9, 17-25
+users/migrations/0001_initial.py                             7      0   100%
+users/migrations/0002_payment.py                             6      0   100%
+users/migrations/0003_alter_user_managers.py                 5      0   100%
+users/migrations/__init__.py                                 0      0   100%
+users/models.py                                             29      2    93%   48, 65
+users/permissions.py                                        12      5    58%   6, 15, 21-24
+users/serializers.py                                        24      5    79%   38-42
+users/tests.py                                              44     43     2%   2-81
+users/urls.py                                                9      1    89%   8
+users/views.py                                              28      7    75%   13, 19, 21-27, 36
+--------------------------------------------------------------------------------------
+TOTAL                                                      575    235    59%
