@@ -196,9 +196,7 @@ class SubscriptionAPITests(APITestCase):
 
     def test_subscribe_to_course(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(
-            self.url, {"course": self.course.id}, format="json"
-        )
+        response = self.client.post(self.url, {"course": self.course.id}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get("message"), "Подписка создана")
         self.assertTrue(
@@ -209,9 +207,7 @@ class SubscriptionAPITests(APITestCase):
         # Сначала создаем подписку
         Subscription.objects.create(user=self.user, course=self.course)
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(
-            self.url, {"course": self.course.id}, format="json"
-        )
+        response = self.client.post(self.url, {"course": self.course.id}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get("message"), "Подписка удалена")
         self.assertFalse(
