@@ -46,7 +46,7 @@ Celery Beat: проверьте работу планировщика задач
 - Установите и настройте Supervisor для автоматического перезапуска приложения при изменениях.
 
 3. Передайте проект на сервер:
-- Склонируйте репозиторий: `git clone https://github.com/вevgeniya-avksenteva.git`
+- Склонируйте репозиторий: `git clone https://github.com/evgeniya-avksenteva.git`
 - Выполните миграции базы данных с помощью команды 
 ```python manage.py migrate```
 
