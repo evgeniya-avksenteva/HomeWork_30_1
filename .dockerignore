@@ -1,0 +1,9 @@
+.idea/
+__pycache__
+.venv
+.env
+*.sqlite3
+.git
+.gitignore
+*.pyc
+test_db.sqlite3
